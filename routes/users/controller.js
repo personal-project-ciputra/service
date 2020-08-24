@@ -7,7 +7,7 @@ module.exports = {
         try{
             const checkRegister = await User.findOne({email:req.body.email}).exec();
             if(checkRegister){
-                res.send({message:'Email already registered'});
+                res.status(403).send({message:'Email already registered'});
             }
             else{
                 const password = req.body.password;
@@ -23,13 +23,14 @@ module.exports = {
         }   
     },
     login: async (req,res) => {
+                const {password, email} = req.body
             try{
-                const checkRegister = await User.findOne({email:req.body.email}).exec();
-                if(checkRegister !==null){
+                const checkRegister = await User.findOne({email:email}).exec();
+                if(checkRegister !== null){
                     const compared = await compare(password, checkRegister.password)
                     if(compared === true){
                         const token = await createToken({
-                            id: checkRegister.id,
+                            id: checkRegister._id,
                             username:checkRegister.username,
                             email:checkRegister.email
                         })
@@ -44,6 +45,7 @@ module.exports = {
                 }
             }
             catch(error){
+                console.log(error);
                 res.send({message:error})
             }
     },
